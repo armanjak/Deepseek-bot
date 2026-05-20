@@ -4,6 +4,13 @@ import json
 import os
 
 from telegram import Update
+from telegram.ext import (
+    ApplicationBuilder,
+    MessageHandler,
+    CommandHandler,
+    filters,
+    ContextTypes
+)
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 from openai import OpenAI
 
@@ -16,6 +23,7 @@ client = OpenAI(
 )
 
 MEMORY_FILE = "memory.json"
+ADMIN_ID = 315356999
 
 if os.path.exists(MEMORY_FILE):
     with open(MEMORY_FILE, "r", encoding="utf-8") as f:
@@ -34,6 +42,12 @@ def run_web():
 
 Thread(target=run_web).start()
 
+async def send_memory(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.chat_id != ADMIN_ID:
+        return
+
+    with open(MEMORY_FILE, "rb") as f:
+        await update.message.reply_document(f)
 async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.message.chat_id)
     user_text = update.message.text
@@ -78,7 +92,7 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(ai_text)
 
 app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-
+app.add_handler(CommandHandler("memory", send_memory))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
 
 app.run_polling(drop_pending_updates=True)
