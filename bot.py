@@ -55,4 +55,4 @@ app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
 
-app.run_polling()
+app.run_polling(drop_pending_updates=True)
