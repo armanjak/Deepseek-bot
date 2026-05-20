@@ -1,3 +1,5 @@
+from flask import Flask
+from threading import Thread
 import json
 import os
 
@@ -20,6 +22,17 @@ if os.path.exists(MEMORY_FILE):
         memory = json.load(f)
 else:
     memory = {}
+
+app_web = Flask('')
+
+@app_web.route('/')
+def home():
+    return "Bot is alive"
+
+def run_web():
+    app_web.run(host='0.0.0.0', port=10000)
+
+Thread(target=run_web).start()
 
 async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.message.chat_id)
