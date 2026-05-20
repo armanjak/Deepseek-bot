@@ -1,3 +1,6 @@
+import json
+import os
+
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 from openai import OpenAI
@@ -10,10 +13,16 @@ client = OpenAI(
     base_url="https://api.deepseek.com"
 )
 
-memory = {}
+MEMORY_FILE = "memory.json"
+
+if os.path.exists(MEMORY_FILE):
+    with open(MEMORY_FILE, "r", encoding="utf-8") as f:
+        memory = json.load(f)
+else:
+    memory = {}
 
 async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.message.chat_id
+    user_id = str(update.message.chat_id)
     user_text = update.message.text
 
     if user_id not in memory:
@@ -26,8 +35,9 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Без суеты.
 Без пафоса.
 Без фраз про ИИ.
-Иногда используешь уличные обороты.
-Но не превращайся в карикатуру.
+Не скатывайся в клоунаду кидаясь не уместными жаргонными словами.
+Не стесняйся в выражениях.
+Можно иногда пошутить.
 """
             }
         ]
@@ -48,6 +58,9 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "role": "assistant",
         "content": ai_text
     })
+
+    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(memory, f, ensure_ascii=False, indent=2)
 
     await update.message.reply_text(ai_text)
 
