@@ -10,24 +10,44 @@ client = OpenAI(
     base_url="https://api.deepseek.com"
 )
 
+memory = {}
+
 async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.chat_id
     user_text = update.message.text
+
+    if user_id not in memory:
+        memory[user_id] = [
+            {
+                "role": "system",
+                "content": """
+Ты спокойный уверенный жиган.
+Говоришь коротко.
+Без суеты.
+Без пафоса.
+Без фраз про ИИ.
+Иногда используешь уличные обороты.
+Но не превращайся в карикатуру.
+"""
+            }
+        ]
+
+    memory[user_id].append({
+        "role": "user",
+        "content": user_text
+    })
 
     response = client.chat.completions.create(
         model="deepseek-chat",
-        messages=[
-            {
-                "role": "system",
-                "content": "Отвечай как спокойный жиган. Коротко и уверенно."
-            },
-            {
-                "role": "user",
-                "content": user_text
-            }
-        ]
+        messages=memory[user_id]
     )
 
     ai_text = response.choices[0].message.content
+
+    memory[user_id].append({
+        "role": "assistant",
+        "content": ai_text
+    })
 
     await update.message.reply_text(ai_text)
 
