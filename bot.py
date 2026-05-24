@@ -38,7 +38,8 @@ def home():
     return "Bot is alive"
 
 def run_web():
-    app_web.run(host='0.0.0.0', port=
+    app_web.run(host='0.0.0.0', port=10000)
+    
 
       Thread(target=run_web, daemon=True).start()
                 
@@ -95,4 +96,9 @@ app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 app.add_handler(CommandHandler("memory", send_memory))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
 
-app.run_polling(drop_pending_updates=True)
+print("привет, старичок")
+
+app.run_polling(
+    drop_pending_updates=True,
+    allowed_updates=Update.ALL_TYPES
+)
