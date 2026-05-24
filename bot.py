@@ -38,10 +38,10 @@ def home():
     return "Bot is alive"
 
 def run_web():
-    app_web.run(host='0.0.0.0', port=10000)
+    app_web.run(host='0.0.0.0', port=
 
-Thread(target=run_web).start()
-
+      Thread(target=run_web, daemon=True).start()
+                
 async def send_memory(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.chat_id != ADMIN_ID:
         return
