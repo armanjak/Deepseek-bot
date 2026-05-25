@@ -38,7 +38,8 @@ def home():
     return "Bot is alive"
 
 def run_web():
-    app_web.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app_web.run(host="0.0.0.0", port=port)
     
 
       Thread(target=run_web, daemon=True).start()
