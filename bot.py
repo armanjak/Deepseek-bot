@@ -14,8 +14,8 @@ from telegram.ext import (
 
 from openai import OpenAI
 
-TELEGRAM_TOKEN = "ТВОЙ_ТЕЛЕГРАМ_ТОКЕН"
-DEEPSEEK_API_KEY = "ТВОЙ_DEEPSEEK_API"
+TELEGRAM_TOKEN = "8665201620:AAGw8uqyc-Svp-kUFxQVI3W_dMnktutFsUg"
+DEEPSEEK_API_KEY = "sk-88be899f09e5408fbf298831030adf64"
 
 client = OpenAI(
     api_key=DEEPSEEK_API_KEY,
