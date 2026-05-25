@@ -41,8 +41,7 @@ def run_web():
     port = int(os.environ.get("PORT", 10000))
     app_web.run(host="0.0.0.0", port=port)
     
-
-      Thread(target=run_web, daemon=True).start()
+Thread(target=run_web, daemon=True).start()
                 
 async def send_memory(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.chat_id != ADMIN_ID:
