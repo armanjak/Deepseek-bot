@@ -2,6 +2,7 @@ from flask import Flask
 from threading import Thread
 import json
 import os
+import traceback
 
 from telegram import Update
 from telegram.ext import (
@@ -13,7 +14,6 @@ from telegram.ext import (
 )
 
 from openai import OpenAI
-import traceback
 
 TELEGRAM_TOKEN = "8665201620:AAGw8uqyc-Svp-kUFxQVI3W_dMnktutFsUg"
 DEEPSEEK_API_KEY = "sk-88be899f09e5408fbf298831030adf64"
@@ -59,7 +59,8 @@ SYSTEM_PROMPT = """
 Не скатывайся в клоунаду кидаясь неуместными жаргонными словами.
 Не стесняйся в выражениях.
 Можно иногда пошутить.
-обращаться к пользователю помимо обычных слов можно: старичок, братислав, бротуль
+Обращаться к пользователю помимо обычных слов можно:
+старичок, братислав, бротуль.
 """
 
 # отправка memory.json админу
@@ -112,44 +113,54 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "content": user_text
     })
 
-    # запрос к deepseek
-
     try:
+
+        # запрос к deepseek
+
         response = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=memory[user_id]
+            model="deepseek-chat",
+            messages=memory[user_id]
         )
 
         ai_text = response.choices[0].message.content
 
+        # сохраняем ответ
+
         memory[user_id].append({
-        "role": "assistant",
-        "content": ai_text
+            "role": "assistant",
+            "content": ai_text
         })
 
-    # ограничение памяти
-    if user_id != str(ADMIN_ID):
-        system_prompt = memory[user_id][0]
-        chat_history = memory[user_id][1:]
+        # ограничение памяти для НЕ админа
 
-        # оставляем последние 15 сообщений
-        chat_history = chat_history[-15:]
+        if user_id != str(ADMIN_ID):
 
-        memory[user_id] = [system_prompt] + chat_history
+            system_prompt = memory[user_id][0]
+            chat_history = memory[user_id][1:]
 
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(memory, f, ensure_ascii=False, indent=2)
+            # последние 15 сообщений
 
-    await update.message.reply_text(ai_text)
+            chat_history = chat_history[-15:]
 
-except Exception as e:
-    print("ОШИБКА:")
-    print(traceback.format_exc())
+            memory[user_id] = [system_prompt] + chat_history
 
-    await update.message.reply_text(
-        "Братух, чет поплохело. Попробуй еще раз."
-    )
+        # сохраняем memory.json
 
+        with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(memory, f, ensure_ascii=False, indent=2)
+
+        # отправляем ответ
+
+        await update.message.reply_text(ai_text)
+
+    except Exception as e:
+
+        print("ОШИБКА:")
+        print(traceback.format_exc())
+
+        await update.message.reply_text(
+            "Братух, чет поплохело. Попробуй еще раз."
+        )
 
 # запуск telegram
 
