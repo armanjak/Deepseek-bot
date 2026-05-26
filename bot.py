@@ -118,14 +118,14 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = client.chat.completions.create(
         model="deepseek-chat",
         messages=memory[user_id]
-    )
+        )
 
-    ai_text = response.choices[0].message.content
+        ai_text = response.choices[0].message.content
 
-    memory[user_id].append({
+        memory[user_id].append({
         "role": "assistant",
         "content": ai_text
-    })
+        })
 
     # ограничение памяти
     if user_id != str(ADMIN_ID):
