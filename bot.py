@@ -13,6 +13,7 @@ from telegram.ext import (
 )
 
 from openai import OpenAI
+import traceback
 
 TELEGRAM_TOKEN = "8665201620:AAGw8uqyc-Svp-kUFxQVI3W_dMnktutFsUg"
 DEEPSEEK_API_KEY = "sk-88be899f09e5408fbf298831030adf64"
@@ -113,6 +114,7 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # запрос к deepseek
 
+    try:
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=memory[user_id]
@@ -120,34 +122,34 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     ai_text = response.choices[0].message.content
 
-    # ответ бота
-
     memory[user_id].append({
         "role": "assistant",
         "content": ai_text
     })
 
-    # ограничение памяти для НЕ админа
-
+    # ограничение памяти
     if user_id != str(ADMIN_ID):
-
         system_prompt = memory[user_id][0]
         chat_history = memory[user_id][1:]
 
-        # последние 15 сообщений
-
+        # оставляем последние 15 сообщений
         chat_history = chat_history[-15:]
 
         memory[user_id] = [system_prompt] + chat_history
 
-    # сохранение memory.json
-
     with open(MEMORY_FILE, "w", encoding="utf-8") as f:
         json.dump(memory, f, ensure_ascii=False, indent=2)
 
-    # ответ пользователю
-
     await update.message.reply_text(ai_text)
+
+except Exception as e:
+    print("ОШИБКА:")
+    print(traceback.format_exc())
+
+    await update.message.reply_text(
+        "Братух, чет поплохело. Попробуй еще раз."
+    )
+
 
 # запуск telegram
 
