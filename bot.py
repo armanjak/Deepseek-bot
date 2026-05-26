@@ -115,7 +115,7 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # запрос к deepseek
 
     try:
-    response = client.chat.completions.create(
+        response = client.chat.completions.create(
         model="deepseek-chat",
         messages=memory[user_id]
     )
